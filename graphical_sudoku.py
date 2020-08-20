@@ -28,7 +28,7 @@ class MyGame(arcade.Window):
         self.writing = None
         self.num = None
         self.solver = None
-
+        self.laptime = None
 
     def setup(self):
         """ Set up the game variables. Call to re-start the game. """
@@ -48,10 +48,11 @@ class MyGame(arcade.Window):
             [0, 4, 9, 2, 0, 6, 0, 0, 7]
         ], self.box_width, self.box_height, self.margin)
 
-        self.player = Player()
+        self.player = Player(None, None)
         self.time = 0
+        self.laptime = 0
         self.writing = False
-        self.solver = Solver()
+        self.solver = Solver(None, None)
 
     def on_draw(self):
         """
@@ -61,17 +62,17 @@ class MyGame(arcade.Window):
         # This command should happen before we start drawing. It will clear
         # the screen to the background color, and erase what we drew last frame.
         arcade.start_render()
-
-        self.board.draw_board(self.height)
         # draw the time
         self.draw_time()
+
+        self.board.draw_board(self.height)
 
         if self.select_pos:
             arcade.draw_rectangle_outline(self.select_pos[0], self.select_pos[1],
                                           self.box_width, self.box_height, arcade.color.DARK_GREEN, 3)
 
-        if self.writing:
-            self.board.insert_num(self.player)
+        # if self.writing:
+        #     self.board.insert_num(self.player)
 
     def on_update(self, delta_time):
         """
@@ -79,8 +80,15 @@ class MyGame(arcade.Window):
         Normally, you'll call update() on the sprite lists that
         need it.
         """
+
         self.time += delta_time
+        self.laptime += delta_time
+
+
+        print(self.laptime)
+
         self.solver.solve(self.board)
+
 
     def on_key_press(self, key, key_modifiers):
         """

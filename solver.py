@@ -1,12 +1,13 @@
 from player import Player
 from board import Board
 from typing import List, Union, Dict
+import time
 
 
 class Solver(Player):
-    def __init__(self):
-        # for memory
-        self.my_stack = []
+    # def __init__(self):
+    #     # for memory
+    #     self.my_stack = []
     @classmethod
     def find_spot(cls, board: List[List[int]]) -> Union[Dict, bool]:
         """Finds an empty spot in the game board
@@ -26,46 +27,35 @@ class Solver(Player):
         :param board: The current sudoku game board
         :return: True is current board is complete, false if not
         """
+        # pause at the beginnning to be able to see steps
+        # time.sleep(1)
         # base case for recursive step
         if not Solver.find_spot(board.board):
             return True
 
         # if there is a spot, find it
-        self.location = Solver.find_spot(board.board)
-        # remember the location
-        self.my_stack.append(self.location)
+        new_spot = Solver.find_spot(board.board)
         # print(self.location)
         # print(self.num)
 
         # try numbers
         for i in range(1, 10):
-            self.set_key(i+48)
-            print(self.location)
-            print(self.num)
+            # get relative key values, values begin a 48 for key value of 0
+            key = i + 48
             # check if number is valid
-            if board.is_num_valid(self):
+            # variable contains is valid and a player object in a dictionary
+            validity = board.is_num_valid(new_spot, key)
+            if validity["valid"]:
                 # set number if valid
-                board.insert_num(self)
+                board.insert_num(validity)
                 # attempt to solve, and if solvable return true
                 if self.solve(board):
                     return True
                 # if not, backtrack and change the past number back to 0, keep looping until you find a number that works
                 else:
-                    self.num = 0
+                    # change number back to zero, key of 48 is a zero
+                    validity["player"].set_key(48)
                     # take off stack since back track
-                    self.location = self.my_stack.pop()
-                    board.insert_num(self)
+                    board.insert_num(validity)
 
-        # board cannot be solved
-        # first remove last unsolveable element
-        # if board.board[self.location["row"]][self.location["column"]] == 0 and len(self.my_stack) > 0:
-        #     self.my_stack.pop()
-        # else:
-        #     self.location = Solver.find_spot(board.board)
-
-        # then get the next element
-        if len(self.my_stack) > 0:
-            self.location = self.my_stack.pop()
-        else:
-            self.location = Solver.find_spot(board.board)
         return False

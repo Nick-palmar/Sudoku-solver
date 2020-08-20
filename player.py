@@ -1,11 +1,11 @@
 from typing import List, Dict
-from board import Board
-import arcade
+# from board import Board
+# import arcade
 
 class Player:
-    def __init__(self):
-        self.num = None
-        self.location = None
+    def __init__(self, location, key):
+        self.set_key(key)
+        self.set_location(location)
 
     def select_box(self, width: int, height: int, click_x, click_y, screen_height) -> List[int]:
         """Visually selects a box that the player clicks on
@@ -20,14 +20,15 @@ class Player:
         """
         box_x = click_x//width
         box_y = (screen_height-click_y)//height
-        self.location = {"row": box_y, "column": box_x}
+        self.set_location({"row": box_y, "column": box_x})
         return [box_x*width + width//2, screen_height - (box_y*height + height//2)]
 
-    def set_key(self, key: str) -> None:
+    def set_key(self, key: int) -> None:
         """Sets the selected key
 
          :param key: Key selected
          """
+
         key_dict = {48: 0,
                     49: 1,
                     50: 2,
@@ -38,8 +39,21 @@ class Player:
                     55: 7,
                     56: 8,
                     57: 9}
-        if 48 <= key <= 57:
-            real_key = key_dict[key]
-            self.num = real_key
+        if key is not None:
+            if 48 <= key <= 57:
+                real_key = key_dict[key]
+                self.num = real_key
+            else:
+                print("invalid key")
         else:
-            print("invalid key")
+            self.num = None
+
+    def set_location(self, new_location) -> None:
+        """Sets the new location if avaliable
+
+        :param new_location: New location of empty spot or none
+        """
+        if new_location is not None:
+            self.location = new_location
+        else:
+            self.location = None

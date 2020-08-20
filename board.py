@@ -1,7 +1,8 @@
 import arcade
 import copy
-
-# from player import Player
+from player import Player
+from typing import Dict
+import time
 
 class Board:
     def __init__(self, game_board, width, height, margin):
@@ -18,21 +19,24 @@ class Board:
         self.margin = margin
         self.original = copy.deepcopy(game_board)
 
-    def is_num_valid(self, player) -> bool:
+    def is_num_valid(self, location, key) -> Dict:
         """Determines if a current number in a spot on the baord is valid
 
-        :param player: The player who is playing sudoku and is picking the numbers
+        :param location:
+        param num:
         :return: True if the spot is valid according to game definitions, otherwise false
         """
+        # create new player object for the recursion
+        player = Player(location, key)
         # check if the current row allows it
         for i in range(len(self.board[0])):
             if self.board[player.location["row"]][i] == player.num and i != player.location["column"]:
-                return False
+                return {"valid": False, "player": player}
 
         # check if the current column allows it
         for j in range(len(self.board)):
             if self.board[j][player.location["column"]] == player.num and j != player.location["row"]:
-                return False
+                return {"valid": False, "player": player}
         # check if the container allows it (not allowed to be in the same 3x3 container)
         # first find what container we are in
         row_container = player.location["row"] // 3
@@ -49,13 +53,13 @@ class Board:
             while current_column < column_boundary + 3:
                 if self.board[current_row][current_column] == player.num and (
                         current_row != player.location["row"] and current_column != player.location["column"]):
-                    return False
+                    return {"valid": False, "player": player}
                 current_column += 1
             current_row += 1
             current_column = column_boundary
 
         # passes all checks, then valid
-        return True
+        return {"valid": True, "player": player}
 
     def draw_board(self, screen_height) -> None:
         """Draws the game board
@@ -92,7 +96,7 @@ class Board:
                                  screen_height - ((self.margin+self.height)*i + self.margin//2),
                                  arcade.color.BLACK, 4)
 
-    def insert_num(self, player) -> None:
+    def insert_num(self, validity) -> None:
         """Inserts a number into the board
 
         :param player: The person/machine playing the game
@@ -100,8 +104,8 @@ class Board:
         """
         # pos_x = (visual_x - self.width//2) // self.width
         # pos_y = (screen_height - visual_y - self.height//2) // self.height
-        if self.is_num_valid(player) and self.board[player.location["row"]][player.location["column"]] == 0:
-            self.board[player.location["row"]][player.location["column"]] = player.num
+        if validity["valid"] and self.board[validity["player"].location["row"]][validity["player"].location["column"]] == 0:
+            self.board[validity["player"].location["row"]][validity["player"].location["column"]] = validity["player"].num
         # selected a 0
-        elif player.num == 0 and self.original[player.location["row"]][player.location["column"]] == 0:
-            self.board[player.location["row"]][player.location["column"]] = player.num
+        elif validity["player"].num == 0 and self.original[validity["player"].location["row"]][validity["player"].location["column"]] == 0:
+            self.board[validity["player"].location["row"]][validity["player"].location["column"]] = validity["player"].num
