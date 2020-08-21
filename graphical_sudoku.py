@@ -29,24 +29,97 @@ class MyGame(arcade.Window):
         self.output_done = None
         self.lap_time = None
         self.draw_new_frame = None
+        self.boards = []
+        self.finishing = None
 
     def setup(self):
         """ Set up the game variables. Call to re-start the game. """
         self.box_width = 40
         self.box_height = 40
         self.margin = 0
+        self.boards = [
+            [[8, 1, 0, 0, 3, 0, 0, 2, 7],
+             [0, 6, 2, 0, 5, 0, 0, 9, 0],
+             [0, 7, 0, 0, 0, 0, 0, 0, 0],
+             [0, 9, 0, 6, 0, 0, 1, 0, 0],
+             [1, 0, 0, 0, 2, 0, 0, 0, 4],
+             [0, 0, 8, 0, 0, 5, 0, 7, 0],
+             [0, 0, 0, 0, 0, 0, 0, 8, 0],
+             [0, 2, 0, 0, 1, 0, 7, 5, 0],
+             [3, 8, 0, 0, 7, 0, 0, 4, 2]],
+
+            [[7, 8, 0, 4, 0, 0, 1, 2, 0],
+             [6, 0, 0, 0, 7, 5, 0, 0, 9],
+             [0, 0, 0, 6, 0, 1, 0, 7, 8],
+             [0, 0, 7, 0, 4, 0, 2, 6, 0],
+             [0, 0, 1, 0, 5, 0, 9, 3, 0],
+             [9, 0, 4, 0, 6, 0, 0, 0, 5],
+             [0, 7, 0, 3, 0, 0, 0, 1, 2],
+             [1, 2, 0, 0, 0, 7, 4, 0, 0],
+             [0, 4, 9, 2, 0, 6, 0, 0, 7]],
+
+            [[1, 0, 4, 0, 0, 0, 3, 0, 6],
+             [8, 0, 9, 0, 3, 0, 5, 7, 0],
+             [0, 0, 0, 0, 7, 0, 1, 0, 0],
+             [4, 2, 6, 0, 0, 0, 0, 0, 3],
+             [0, 8, 7, 0, 0, 6, 0, 1, 2],
+             [3, 0, 0, 0, 0, 0, 0, 0, 9],
+             [2, 4, 1, 9, 0, 0, 0, 3, 0],
+             [0, 0, 0, 2, 0, 0, 0, 8, 0],
+             [7, 0, 0, 5, 0, 3, 0, 0, 0]],
+
+            [[2, 9, 0, 1, 0, 0, 0, 0, 5],
+             [0, 7, 0, 0, 5, 0, 0, 0, 0],
+             [0, 8, 0, 0, 0, 0, 6, 0, 0],
+             [4, 0, 0, 0, 3, 2, 0, 0, 0],
+             [0, 0, 5, 8, 0, 7, 2, 0, 0],
+             [0, 0, 0, 9, 6, 0, 0, 0, 1],
+             [0, 0, 9, 0, 0, 0, 0, 1, 0],
+             [0, 0, 0, 0, 2, 0, 0, 5, 0],
+             [6, 0, 0, 0, 0, 1, 0, 7, 2]],
+
+            [[8, 0, 0, 5, 9, 0, 3, 0, 1],
+             [0, 2, 0, 7, 0, 0, 8, 0, 0],
+             [0, 0, 0, 8, 0, 0, 0, 0, 2],
+             [0, 0, 8, 0, 0, 0, 0, 1, 0],
+             [0, 0, 0, 3, 0, 5, 0, 0, 0],
+             [0, 4, 0, 0, 0, 0, 5, 0, 0],
+             [1, 0, 0, 0, 0, 3, 0, 0, 0],
+             [0, 0, 7, 0, 0, 4, 0, 8, 0],
+             [5, 0, 9, 0, 7, 8, 0, 0, 6]],
+
+            [[0, 9, 0, 0, 0, 0, 7, 0, 0],
+             [0, 0, 0, 0, 1, 0, 0, 0, 8],
+             [0, 2, 0, 6, 0, 9, 0, 0, 0],
+             [5, 0, 0, 0, 6, 0, 3, 2, 0],
+             [3, 0, 0, 9, 0, 2, 0, 0, 5],
+             [0, 6, 0, 0, 3, 0, 0, 0, 4],
+             [0, 0, 0, 3, 0, 7, 0, 5, 0],
+             [9, 0, 0, 0, 4, 0, 0, 0, 0],
+             [0, 0, 6, 0, 0, 0, 0, 4, 0]],
+
+            [[2, 0, 0, 0, 8, 5, 0, 9, 1],
+             [0, 0, 0, 2, 0, 0, 0, 7, 0],
+             [0, 0, 6, 0, 0, 0, 0, 0, 5],
+             [6, 0, 0, 0, 0, 9, 0, 0, 0],
+             [0, 9, 3, 0, 0, 0, 1, 4, 0],
+             [0, 0, 0, 4, 0, 0, 0, 0, 2],
+             [4, 0, 0, 0, 0, 0, 8, 0, 0],
+             [0, 1, 0, 0, 0, 8, 0, 0, 0],
+             [8, 2, 0, 3, 1, 0, 0, 0, 4]],
+
+            [[9, 0, 3, 0, 2, 0, 0, 7, 0],
+             [1, 6, 0, 0, 0, 0, 0, 2, 0],
+             [7, 0, 0, 0, 0, 9, 3, 0, 0],
+             [0, 9, 5, 0, 0, 8, 0, 4, 0],
+             [0, 0, 6, 0, 0, 0, 9, 0, 0],
+             [0, 1, 0, 9, 0, 0, 6, 3, 0],
+             [0, 0, 4, 3, 0, 0, 0, 0, 7],
+             [0, 8, 0, 0, 0, 0, 0, 6, 0],
+             [0, 7, 0, 0, 1, 0, 2, 0, 8]]
+        ]
         # Create your sprites and sprite lists here
-        self.board = Board([
-            [7, 8, 0, 4, 0, 0, 1, 2, 0],
-            [6, 0, 0, 0, 7, 5, 0, 0, 9],
-            [0, 0, 0, 6, 0, 1, 0, 7, 8],
-            [0, 0, 7, 0, 4, 0, 2, 6, 0],
-            [0, 0, 1, 0, 5, 0, 9, 3, 0],
-            [9, 0, 4, 0, 6, 0, 0, 0, 5],
-            [0, 7, 0, 3, 0, 0, 0, 1, 2],
-            [1, 2, 0, 0, 0, 7, 4, 0, 0],
-            [0, 4, 9, 2, 0, 6, 0, 0, 7]
-        ], self.box_width, self.box_height, self.margin)
+        self.board = Board(self.boards[0], self.box_width, self.box_height, self.margin)
 
         self.player = Player(None, None)
         self.time = 0
@@ -57,6 +130,7 @@ class MyGame(arcade.Window):
         self.index = 0
         self.output_done = False
         self.draw_new_frame = False
+        self.finishing = False
 
     def on_draw(self):
         """
@@ -69,6 +143,12 @@ class MyGame(arcade.Window):
         self.select_board()
         # draw the board
         self.board.draw_board(self.height)
+
+        if self.output_done:
+            arcade.draw_text("Done!", self.width//4, self.height//2, arcade.color.RED, 70)
+
+        if self.finishing:
+            arcade.draw_text("Finishing, too long!", self.width // 4, self.height // 40, arcade.color.RED, 20)
         # removed, for player functionality
         # if self.select_pos:
         #     arcade.draw_rectangle_outline(self.select_pos[0], self.select_pos[1],
@@ -77,28 +157,37 @@ class MyGame(arcade.Window):
     def select_board(self) -> None:
         """Selects what board to output
         """
-        if not self.solved or self.output_done:
-            self.board.drawing_board = self.board.board
-        else:
-            if self.draw_new_frame:
-                # on the last frame, set to constant final frame
-                if self.index + 1 == len(self.board.all_boards):
-                    self.output_done = True
-                    self.board.drawing_board = self.board.board
-                else:
-                    # not on last frame, draw a new step in the process
-                    self.board.drawing_board = self.board.all_boards[self.index]
-                    self.index += 1
-                self.draw_new_frame = False
+        if self.lap_time < 10 or self.finishing or self.output_done:
+            if not self.solved or self.output_done:
+                self.board.drawing_board = self.board.board
             else:
-                self.board.drawing_board = self.board.all_boards[self.index]
+                if self.draw_new_frame:
+                    # on the last frame, set to constant final frame
+                    if self.index + 1 == len(self.board.all_boards):
+                        self.output_done = True
+                        self.finishing = False
+                        self.board.drawing_board = self.board.board
+                    else:
+                        # not on last frame, draw a new step in the process
+                        self.board.drawing_board = self.board.all_boards[self.index]
+                        self.index += 1
+                    self.draw_new_frame = False
+                else:
+                    self.board.drawing_board = self.board.all_boards[self.index]
+        else:
+            # speed up the process if too long, skip to last 100 frames
+            self.finishing = True
+            self.index = len(self.board.all_boards) - 100
 
     def on_update(self, delta_time):
         """
         All the logic to move, and the game logic goes here.
         """
-        self.time += delta_time
-        self.lap_time += delta_time
+        if not self.output_done:
+            self.time += delta_time
+
+        if self.solved:
+            self.lap_time += delta_time
 
         if self.mark_time <= self.time:
             self.draw_new_frame = True
@@ -125,9 +214,9 @@ class MyGame(arcade.Window):
         """
         Called when a user releases a mouse button.
         """
-        while not self.solved:
+        if not self.solved:
             self.solved = self.solver.solve(self.board)
-            print("done solving")
+            print(self.board.all_boards[-1])
 
     def draw_time(self):
         minute = round(self.time // 60)
