@@ -1,13 +1,9 @@
 from player import Player
 from board import Board
 from typing import List, Union, Dict
-import time
 
 
 class Solver(Player):
-    # def __init__(self):
-    #     # for memory
-    #     self.my_stack = []
     @classmethod
     def find_spot(cls, board: List[List[int]]) -> Union[Dict, bool]:
         """Finds an empty spot in the game board
@@ -27,16 +23,12 @@ class Solver(Player):
         :param board: The current sudoku game board
         :return: True is current board is complete, false if not
         """
-        # pause at the beginnning to be able to see steps
-        # time.sleep(1)
         # base case for recursive step
         if not Solver.find_spot(board.board):
             return True
 
         # if there is a spot, find it
         new_spot = Solver.find_spot(board.board)
-        # print(self.location)
-        # print(self.num)
 
         # try numbers
         for i in range(1, 10):
@@ -51,7 +43,8 @@ class Solver(Player):
                 # attempt to solve, and if solvable return true
                 if self.solve(board):
                     return True
-                # if not, backtrack and change the past number back to 0, keep looping until you find a number that works
+                # if not, backtrack and change the past number back to 0
+                # keep looping until you find a number that works
                 else:
                     # change number back to zero, key of 48 is a zero
                     validity["player"].set_key(48)

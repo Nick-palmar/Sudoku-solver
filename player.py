@@ -1,9 +1,13 @@
 from typing import List, Dict
-# from board import Board
-# import arcade
+
 
 class Player:
     def __init__(self, location, key):
+        """Makes a player object
+
+        :param location: Location chosen by the player
+        :param key: Key (corresponsing to a number) chosen by the player
+        """
         self.set_key(key)
         self.set_location(location)
 
@@ -12,7 +16,6 @@ class Player:
 
         :param width: Width of box
         :param height: Height of box
-        :param board: Sudoku board
         :param click_x: X position of click
         :param click_y: Y position of click
         :param screen_height: self.height of screen

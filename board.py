@@ -1,11 +1,11 @@
 import arcade
 import copy
 from player import Player
-from typing import Dict
-import time
+from typing import Dict, List
+
 
 class Board:
-    def __init__(self, game_board, width, height, margin):
+    def __init__(self, game_board: List[List[int]], width: int, height: int, margin: int):
         """Makes a game board
 
         :param game_board: The game board from the sudoku game
@@ -18,13 +18,15 @@ class Board:
         self.height = height
         self.margin = margin
         self.original = copy.deepcopy(game_board)
+        self.drawing_board = copy.deepcopy(game_board)
+        self.all_boards = []
 
-    def is_num_valid(self, location, key) -> Dict:
+    def is_num_valid(self, location: Dict, key: int) -> Dict:
         """Determines if a current number in a spot on the baord is valid
 
-        :param location:
-        param num:
-        :return: True if the spot is valid according to game definitions, otherwise false
+        :param location: Location of a number on the board in terms of column and row
+        :param key: The key value of a key pressed (numbers from 0-9 go from 48-57 respectively)
+        :return: A dictionary containing if the number is valid, along with a player object
         """
         # create new player object for the recursion
         player = Player(location, key)
@@ -64,13 +66,13 @@ class Board:
     def draw_board(self, screen_height) -> None:
         """Draws the game board
 
-        :param screen_height: self.height of screen
+        :param screen_height: height of screen
         """
         text_adjust = {"x": self.width//8, "y": self.height//3}
         drawn_vertical = [False]*2
         drawn_horizontal = [False]*2
-        for i in range(len(self.board)):
-            for j in range(len(self.board[0])):
+        for i in range(len(self.drawing_board)):
+            for j in range(len(self.drawing_board[0])):
                 # figure out box position
                 box_x = (self.margin + self.width) * j + self.margin + self.width//2
                 box_y = screen_height - ((self.margin + self.height) * i + self.margin + self.height // 2)
@@ -79,31 +81,31 @@ class Board:
                 if j % 3 == 0 and j != 8 and j != 0 and not drawn_vertical[j//3 - 1]:
                     arcade.draw_line((self.margin+self.width)*j + self.margin//2, screen_height - self.margin,
                                      (self.margin+self.width)*j + self.margin//2,
-                                     screen_height - (self.margin+self.height)*len(self.board),
+                                     screen_height - (self.margin+self.height)*len(self.drawing_board),
                                      arcade.color.BLACK, 4)
                 # draw box
                 arcade.draw_rectangle_outline(box_x, box_y, self.width, self.height, arcade.color.BLACK)
 
                 # write number if there is one
-                if self.board[i][j] != 0:
-                    arcade.draw_text(str(self.board[i][j]), box_x - text_adjust["x"],
+                if self.drawing_board[i][j] != 0:
+                    arcade.draw_text(str(self.drawing_board[i][j]), box_x - text_adjust["x"],
                                      box_y - text_adjust["y"], arcade.color.BLACK, 20)
 
             # check to see if horizontal line must be drawn
             if i % 3 == 0 and i != 8 and i != 0 and not drawn_horizontal[i // 3 - 1]:
                 arcade.draw_line(self.margin, screen_height - ((self.margin+self.height)*i + self.margin//2),
-                                 (self.margin+self.width)*len(self.board[i]),
+                                 (self.margin+self.width)*len(self.drawing_board[i]),
                                  screen_height - ((self.margin+self.height)*i + self.margin//2),
                                  arcade.color.BLACK, 4)
 
-    def insert_num(self, validity) -> None:
+    def insert_num(self, validity: Dict) -> None:
         """Inserts a number into the board
 
-        :param player: The person/machine playing the game
-        :param screen_height: height of screen
+        :param validity: A dictionary containing information on if the insert is valid and a player object
         """
-        # pos_x = (visual_x - self.width//2) // self.width
-        # pos_y = (screen_height - visual_y - self.height//2) // self.height
+        # make an instance so that the pointer isn't to the same list object
+        board_instance = copy.deepcopy(self.board)
+        self.all_boards.append(board_instance)
         if validity["valid"] and self.board[validity["player"].location["row"]][validity["player"].location["column"]] == 0:
             self.board[validity["player"].location["row"]][validity["player"].location["column"]] = validity["player"].num
         # selected a 0

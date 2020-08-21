@@ -2,7 +2,6 @@ import arcade
 from board import Board
 from player import Player
 from solver import Solver
-from typing import List
 
 SCREEN_WIDTH = 360
 SCREEN_HEIGHT = 400
@@ -10,14 +9,10 @@ SCREEN_TITLE = "Sudoku"
 
 
 class MyGame(arcade.Window):
-
     def __init__(self, width, height, title):
         super().__init__(width, height, title)
 
         arcade.set_background_color(arcade.color.WHITE)
-
-        # If you have sprite lists, you should create them here,
-        # and set them to None
         self.board = [[]]
         self.player = None
         self.time = None
@@ -28,7 +23,12 @@ class MyGame(arcade.Window):
         self.writing = None
         self.num = None
         self.solver = None
-        self.laptime = None
+        self.mark_time = None
+        self.solved = False
+        self.index = None
+        self.output_done = None
+        self.lap_time = None
+        self.draw_new_frame = None
 
     def setup(self):
         """ Set up the game variables. Call to re-start the game. """
@@ -50,81 +50,84 @@ class MyGame(arcade.Window):
 
         self.player = Player(None, None)
         self.time = 0
-        self.laptime = 0
+        self.lap_time = 0
+        self.mark_time = 0.1
         self.writing = False
         self.solver = Solver(None, None)
+        self.index = 0
+        self.output_done = False
+        self.draw_new_frame = False
 
     def on_draw(self):
         """
         Render the screen.
         """
-
-        # This command should happen before we start drawing. It will clear
-        # the screen to the background color, and erase what we drew last frame.
         arcade.start_render()
         # draw the time
         self.draw_time()
 
+        self.select_board()
+        # draw the board
         self.board.draw_board(self.height)
+        # removed, for player functionality
+        # if self.select_pos:
+        #     arcade.draw_rectangle_outline(self.select_pos[0], self.select_pos[1],
+        #                                   self.box_width, self.box_height, arcade.color.DARK_GREEN, 3)
 
-        if self.select_pos:
-            arcade.draw_rectangle_outline(self.select_pos[0], self.select_pos[1],
-                                          self.box_width, self.box_height, arcade.color.DARK_GREEN, 3)
-
-        # if self.writing:
-        #     self.board.insert_num(self.player)
+    def select_board(self) -> None:
+        """Selects what board to output
+        """
+        if not self.solved or self.output_done:
+            self.board.drawing_board = self.board.board
+        else:
+            if self.draw_new_frame:
+                # on the last frame, set to constant final frame
+                if self.index + 1 == len(self.board.all_boards):
+                    self.output_done = True
+                    self.board.drawing_board = self.board.board
+                else:
+                    # not on last frame, draw a new step in the process
+                    self.board.drawing_board = self.board.all_boards[self.index]
+                    self.index += 1
+                self.draw_new_frame = False
+            else:
+                self.board.drawing_board = self.board.all_boards[self.index]
 
     def on_update(self, delta_time):
         """
         All the logic to move, and the game logic goes here.
-        Normally, you'll call update() on the sprite lists that
-        need it.
         """
-
         self.time += delta_time
-        self.laptime += delta_time
+        self.lap_time += delta_time
 
+        if self.mark_time <= self.time:
+            self.draw_new_frame = True
+            self.mark_time += 0.1
 
-        print(self.laptime)
+    # removed, for player functionality
+    # def on_key_press(self, key, key_modifiers):
+    #     """
+    #     Called whenever a key on the keyboard is pressed.
+    #     """
+    #     if self.select_pos:
+    #         self.writing = True
+    #         self.player.set_key(key)
 
-        self.solver.solve(self.board)
-
-
-    def on_key_press(self, key, key_modifiers):
-        """
-        Called whenever a key on the keyboard is pressed.
-
-        For a full list of keys, see:
-        http://arcade.academy/arcade.key.html
-        """
-        if self.select_pos:
-            self.writing = True
-            self.player.set_key(key)
-
-    def on_key_release(self, key, key_modifiers):
-        """
-        Called whenever the user lets off a previously pressed key.
-        """
-        pass
-
-    def on_mouse_motion(self, x, y, delta_x, delta_y):
-        """
-        Called whenever the mouse moves.
-        """
-        pass
-
-    def on_mouse_press(self, x, y, button, key_modifiers):
-        """
-        Called when the user presses a mouse button.
-        """
-        self.select_pos = self.player.select_box(self.box_width, self.box_height, x, y, self.height)
-        self.writing = False
+    # removed, for player functionality
+    # def on_mouse_press(self, x, y, button, key_modifiers):
+    #     """
+    #     Called when the user presses a mouse button.
+    #     """
+    #     self.select_pos = self.player.select_box(self.box_width, self.box_height, x, y, self.height)
+    #     self.writing = False
 
     def on_mouse_release(self, x, y, button, key_modifiers):
         """
         Called when a user releases a mouse button.
         """
-        pass
+        while not self.solved:
+            self.solved = self.solver.solve(self.board)
+            print("done solving")
 
     def draw_time(self):
         minute = round(self.time // 60)
